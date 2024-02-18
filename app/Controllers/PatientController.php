@@ -23,7 +23,6 @@ class PatientController extends BaseController
 
     public function sync_patient_state()
     {
-        // TODO: Add to routes
         $post = $this->request->getJSON();
 
         if (
@@ -37,7 +36,8 @@ class PatientController extends BaseController
             !isset($post->barangay) ||
             !isset($post->address_description) ||
             !isset($post->zip_code) ||
-            !isset($post->contact_number)
+            !isset($post->contact_number) ||
+            !isset($post->web_id)
         ) {
             return $this->response
                 ->setcontenttype('application/json')
@@ -45,7 +45,25 @@ class PatientController extends BaseController
                 ->setstatuscode(404);
         }
 
-        // TODO:
+        // TODO: should send app secret key 
+
+        $patientModel = new PatientModel();
+        $patientModel->update($post->web_id, [
+            'name' => $post->first_name . (empty($post->middle_name) ? "" : " " . $post->middle_name)  . " " . $post->last_name,
+            'birthdate' => $post->birth_date,
+            'province' => $post->province,
+            'municipality' => $post->municipality,
+            'barangay' => $post->barangay,
+            'address_description' => $post->address_description,
+            'zip_code' => $post->zip_code,
+            'contact_number' => $post->contact_number,
+            'sex' => $post->is_male ? 'male' : 'female',
+        ]);
+
+        return $this->response
+            ->setcontenttype('application/json')
+            ->setjson(['message' => 'Success'])
+            ->setstatuscode(200);
     }
 
     public function upload_record()
@@ -104,6 +122,12 @@ class PatientController extends BaseController
         }
 
         $payload = Utils::parseJWT($jwt);
+        if (!isset($payload)) {
+            return $this->response
+                ->setcontenttype('application/json')
+                ->setjson(['message' => 'Unauthorized'])
+                ->setstatuscode(403);
+        }
 
         $connectionModel = new ConnectionModel();
         $connections = $connectionModel
@@ -130,6 +154,42 @@ class PatientController extends BaseController
             ->setStatusCode(200);
     }
 
+    public function revoke_doctor()
+    {
+        // TODO: Both patients and doctors can do this
+
+        $post = $this->request->getJSON();
+
+        if (!isset($post->connection_id)) {
+            return $this->response
+                ->setcontenttype('application/json')
+                ->setjson([
+                    'message' => 'invalid data shape',
+                ])
+                ->setstatuscode(404);
+        }
+
+        $connectionModel = new ConnectionModel();
+        $connection = $connectionModel->find($post->connection_id);
+        if (!isset($connection)) {
+            return $this->response
+                ->setcontenttype('application/json')
+                ->setjson(['message' => 'connection not found'])
+                ->setstatuscode(404);
+        }
+
+        $connectionModel->delete($post->connection_id);
+
+        return $this->response
+            ->setcontenttype('application/json')
+            ->setjson([
+                'message' => 'Success',
+                'doctor_id' => $connection['fk_doctor_id'],
+                'patient_id' => $connection['fk_patient_id'],
+            ])
+            ->setstatuscode(200);
+    }
+
     public function assign_doctor()
     {
         $jwt = get_cookie("jwt");
@@ -152,7 +212,7 @@ class PatientController extends BaseController
             ->where('fk_doctor_id', $post->doctor_id)
             ->where('fk_patient_id', $post->patient_id)
             ->findAll();
-            
+
         if (!empty($connection)) {
             return $this->response
                 ->setcontenttype('application/json')
@@ -202,7 +262,7 @@ class PatientController extends BaseController
 
         // TODO: Check key only found inside the dialife app
 
-        $patientModel->insert([
+        $id = $patientModel->insert([
             'name' => $post->name,
             'birthdate' => $post->birthdate,
             'province' => $post->province,
@@ -216,7 +276,10 @@ class PatientController extends BaseController
 
         return $this->response
             ->setContentType('application/json')
-            ->setJSON(['message' => 'Success'])
+            ->setJSON([
+                'message' => 'Success',
+                'web_id' => $id,
+            ])
             ->setStatusCode(404);
     }
 }
