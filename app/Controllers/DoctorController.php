@@ -44,7 +44,7 @@ class DoctorController extends BaseController
                 ->setStatusCode(404);
         }
 
-        if ($payload['id'] !== $post->doctor_id) {
+        if ($payload['id'] != $post->doctor_id) {
             return $this->response
                 ->setContentType('application/json')
                 ->setJSON(['message' => 'Unauthorized'])
@@ -88,7 +88,7 @@ class DoctorController extends BaseController
                 ->setStatusCode(404);
         }
 
-        if ($payload['id'] !== $post->doctor_id) {
+        if ($payload['id'] != $post->doctor_id) {
             return $this->response
                 ->setContentType('application/json')
                 ->setJSON(['message' => 'Unauthorized'])
@@ -122,6 +122,15 @@ class DoctorController extends BaseController
                 ->setJSON(['message' => 'invalid data shape'])
                 ->setStatusCode(404);
         }
+
+        $numberModel = new DoctorNumberModel();
+        $numbers = $numberModel
+            ->where('fk_doctor_id', $post->doctor_id)
+            ->findAll();
+
+        return $this->response
+            ->setContentType('application/json')
+            ->setJSON($numbers);
     }
 
     public function login()
@@ -167,7 +176,10 @@ class DoctorController extends BaseController
 
         return $this->response
             ->setContentType('application/json')
-            ->setJSON(['message' => 'Success'])
+            ->setJSON([
+                'message' => 'Success',
+                'id' => $doctor['doctor_id'],
+            ])
             ->setStatusCode(200);
     }
 
