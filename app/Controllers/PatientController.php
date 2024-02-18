@@ -122,7 +122,7 @@ class PatientController extends BaseController
         $records = $recordModel
             ->orderBy('created_at')
             ->limit($recordCount)
-            ->findAll();
+            ->find();
 
         return $this->response
             ->setContentType('application/json')
