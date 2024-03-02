@@ -46,8 +46,15 @@ class PatientController extends BaseController
         }
 
         // TODO: should send app secret key 
-
         $patientModel = new PatientModel();
+
+        if (empty($patientModel->where("patient_id", $post->web_id)->find())) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'no such user'])
+                ->setStatusCode(404);
+        }
+
         $patientModel->update($post->web_id, [
             'name' => $post->first_name . (empty($post->middle_name) ? "" : " " . $post->middle_name)  . " " . $post->last_name,
             'birthdate' => $post->birthdate,
