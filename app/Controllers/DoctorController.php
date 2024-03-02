@@ -26,9 +26,9 @@ class DoctorController extends BaseController
 
         if (!isset($jwt) || $jwt === "deleted") {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         $payload = Utils::parseJWT($jwt);
@@ -70,9 +70,9 @@ class DoctorController extends BaseController
 
         if (!isset($jwt) || $jwt === "deleted") {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         $payload = Utils::parseJWT($jwt);
@@ -133,7 +133,7 @@ class DoctorController extends BaseController
             ->setJSON($numbers);
     }
 
-    public function login()
+    public function login() 
     {
         $doctorModel = new DoctorModel();
         $post = $this->request->getJSON();

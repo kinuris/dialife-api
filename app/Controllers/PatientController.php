@@ -30,7 +30,7 @@ class PatientController extends BaseController
             !isset($post->middle_name) ||
             !isset($post->last_name) ||
             !isset($post->is_male) ||
-            !isset($post->birth_date) ||
+            !isset($post->birthdate) ||
             !isset($post->province) ||
             !isset($post->municipality) ||
             !isset($post->barangay) ||
@@ -40,9 +40,9 @@ class PatientController extends BaseController
             !isset($post->web_id)
         ) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'invalid data shape'])
-                ->setstatuscode(404);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
         }
 
         // TODO: should send app secret key 
@@ -50,7 +50,7 @@ class PatientController extends BaseController
         $patientModel = new PatientModel();
         $patientModel->update($post->web_id, [
             'name' => $post->first_name . (empty($post->middle_name) ? "" : " " . $post->middle_name)  . " " . $post->last_name,
-            'birthdate' => $post->birth_date,
+            'birthdate' => $post->birthdate,
             'province' => $post->province,
             'municipality' => $post->municipality,
             'barangay' => $post->barangay,
@@ -61,9 +61,9 @@ class PatientController extends BaseController
         ]);
 
         return $this->response
-            ->setcontenttype('application/json')
-            ->setjson(['message' => 'Success'])
-            ->setstatuscode(200);
+            ->setContentType('application/json')
+            ->setJSON(['message' => 'Success'])
+            ->setStatusCode(200);
     }
 
     public function upload_record()
@@ -83,9 +83,9 @@ class PatientController extends BaseController
             !isset($post->patient_id)
         ) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'invalid data shape'])
-                ->setstatuscode(404);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
         }
 
         // TODO: Implement security measures via public/private keys
@@ -105,9 +105,9 @@ class PatientController extends BaseController
         ]);
 
         return $this->response
-            ->setcontenttype('application/json')
-            ->setjson(['message' => 'Success'])
-            ->setstatuscode(200);
+            ->setContentType('application/json')
+            ->setJSON(['message' => 'Success'])
+            ->setStatusCode(200);
     }
 
     public function get_recent_records($patientId, $recordCount)
@@ -116,17 +116,17 @@ class PatientController extends BaseController
 
         if (!isset($jwt) || $jwt === "deleted") {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         $payload = Utils::parseJWT($jwt);
         if (!isset($payload)) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         $connectionModel = new ConnectionModel();
@@ -137,9 +137,9 @@ class PatientController extends BaseController
 
         if (empty($connections)) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         $recordModel = new PatientRecordModel();
@@ -162,32 +162,32 @@ class PatientController extends BaseController
 
         if (!isset($post->connection_id)) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson([
+                ->setContentType('application/json')
+                ->setJSON([
                     'message' => 'invalid data shape',
                 ])
-                ->setstatuscode(404);
+                ->setStatusCode(404);
         }
 
         $connectionModel = new ConnectionModel();
         $connection = $connectionModel->find($post->connection_id);
         if (!isset($connection)) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'connection not found'])
-                ->setstatuscode(404);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'connection not found'])
+                ->setStatusCode(404);
         }
 
         $connectionModel->delete($post->connection_id);
 
         return $this->response
-            ->setcontenttype('application/json')
-            ->setjson([
+            ->setContentType('application/json')
+            ->setJSON([
                 'message' => 'Success',
                 'doctor_id' => $connection['fk_doctor_id'],
                 'patient_id' => $connection['fk_patient_id'],
             ])
-            ->setstatuscode(200);
+            ->setStatusCode(200);
     }
 
     public function assign_doctor()
@@ -196,9 +196,9 @@ class PatientController extends BaseController
 
         if (!isset($jwt) || $jwt === "deleted") {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'Unauthorized'])
-                ->setstatuscode(403);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'Unauthorized'])
+                ->setStatusCode(403);
         }
 
         // TODO: Only a doctor can initiate this 
@@ -215,9 +215,9 @@ class PatientController extends BaseController
 
         if (!empty($connection)) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'invalid data shape'])
-                ->setstatuscode(404);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
         }
 
         $connectionModel->insert(['fk_doctor_id' => $post->doctor_id, 'fk_patient_id' => $post->patient_id]);
@@ -233,9 +233,9 @@ class PatientController extends BaseController
         }
 
         return $this->response
-            ->setcontenttype('application/json')
-            ->setjson(['message' => 'Success'])
-            ->setstatuscode(200);
+            ->setContentType('application/json')
+            ->setJSON(['message' => 'Success'])
+            ->setStatusCode(200);
     }
 
     public function create_patient()
@@ -255,9 +255,9 @@ class PatientController extends BaseController
             !isset($post->contact_number)
         ) {
             return $this->response
-                ->setcontenttype('application/json')
-                ->setjson(['message' => 'invalid data shape'])
-                ->setstatuscode(404);
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
         }
 
         // TODO: Check key only found inside the dialife app
@@ -279,7 +279,6 @@ class PatientController extends BaseController
             ->setJSON([
                 'message' => 'Success',
                 'web_id' => $id,
-            ])
-            ->setStatusCode(404);
+            ]);
     }
 }
