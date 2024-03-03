@@ -78,16 +78,25 @@ class PatientController extends BaseController
         $post = $this->request->getJSON();
 
         if (
+            !isset($post->glucose_created_at) ||
             !isset($post->blood_glucose_level) ||
+            !isset($post->bmi_created_at) ||
             !isset($post->bmi_level) ||
+            !isset($post->activity_created_at) ||
             !isset($post->activity_type) ||
             !isset($post->activity_duration) ||
             !isset($post->activity_frequency) ||
+            !isset($post->nutrition_created_at) ||
             !isset($post->nutrition_protein) ||
             !isset($post->nutrition_fat) ||
             !isset($post->nutrition_carbohydrates) ||
             !isset($post->nutrition_water) ||
-            !isset($post->patient_id)
+            !isset($post->patient_id) ||
+            !isset($post->medicine_name) ||
+            !isset($post->medicine_route) ||
+            !isset($post->medicine_form) ||
+            !isset($post->medicine_dosage) ||
+            !isset($post->medicine_taken_at)
         ) {
             return $this->response
                 ->setContentType('application/json')
@@ -109,6 +118,15 @@ class PatientController extends BaseController
             'nutrition_carbohydrates' => $post->nutrition_carbohydrates,
             'nutrition_water' => $post->nutrition_water,
             'fk_patient_id' => $post->patient_id,
+            'glucose_created_at' => $post->glucose_created_at,
+            'bmi_created_at' => $post->bmi_created_at,
+            'nutrition_created_at' => $post->nutrition_created_at,
+            'activity_created_at' => $post->activity_created_at,
+            'medicine_name' => $post->medicine_name,
+            'medicine_route' => $post->medicine_route,
+            'medicine_form' => $post->medicine_form,
+            'medicine_dosage' => $post->medicine_dosage,
+            'medicine_taken_at' => $post->medicine_taken_at,
         ]);
 
         return $this->response
