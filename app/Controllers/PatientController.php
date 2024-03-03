@@ -7,8 +7,8 @@ use App\Models\ConnectionModel;
 use App\Models\PatientModel;
 use App\Models\PatientRecordModel;
 use App\Utils\Utils;
-use CodeIgniter\HTTP\ResponseInterface;
 use DateTime;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class PatientController extends BaseController
 {
@@ -130,7 +130,7 @@ class PatientController extends BaseController
         }
 
         $recordModel->insert([
-            'blood_glucose_level' => $post->blood_glucose_level,
+            'blood_glucose_level' => $post->glucose_level,
             'bmi_level' => $post->bmi_level,
             'activity_type' => $post->activity_type,
             'activity_duration' => $post->activity_duration,
