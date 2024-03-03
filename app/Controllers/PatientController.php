@@ -8,6 +8,7 @@ use App\Models\PatientModel;
 use App\Models\PatientRecordModel;
 use App\Utils\Utils;
 use CodeIgniter\HTTP\ResponseInterface;
+use DateTime;
 
 class PatientController extends BaseController
 {
@@ -78,25 +79,26 @@ class PatientController extends BaseController
         $post = $this->request->getJSON();
 
         if (
-            !isset($post->glucose_created_at) ||
-            !isset($post->blood_glucose_level) ||
-            !isset($post->bmi_created_at) ||
-            !isset($post->bmi_level) ||
-            !isset($post->activity_created_at) ||
-            !isset($post->activity_type) ||
-            !isset($post->activity_duration) ||
-            !isset($post->activity_frequency) ||
-            !isset($post->nutrition_created_at) ||
-            !isset($post->nutrition_protein) ||
-            !isset($post->nutrition_fat) ||
-            !isset($post->nutrition_carbohydrates) ||
-            !isset($post->nutrition_water) ||
-            !isset($post->patient_id) ||
-            !isset($post->medicine_name) ||
-            !isset($post->medicine_route) ||
-            !isset($post->medicine_form) ||
-            !isset($post->medicine_dosage) ||
-            !isset($post->medicine_taken_at)
+            // !isset($post->glucose_created_at) ||
+            // !isset($post->blood_glucose_level) ||
+            // !isset($post->bmi_created_at) ||
+            // !isset($post->bmi_level) ||
+            // !isset($post->activity_created_at) ||
+            // !isset($post->activity_type) ||
+            // !isset($post->activity_duration) ||
+            // !isset($post->activity_frequency) ||
+            // !isset($post->nutrition_created_at) ||
+            // !isset($post->nutrition_protein) ||
+            // !isset($post->nutrition_fat) ||
+            // !isset($post->nutrition_carbohydrates) ||
+            // !isset($post->nutrition_water) ||
+            // !isset($post->medicine_name) ||
+            // !isset($post->medicine_route) ||
+            // !isset($post->medicine_form) ||
+            // !isset($post->medicine_dosage) ||
+            // !isset($post->medicine_taken_at) ||
+            !isset($post->patient_id)
+
         ) {
             return $this->response
                 ->setContentType('application/json')
@@ -107,6 +109,26 @@ class PatientController extends BaseController
         // TODO: Implement security measures via public/private keys
 
         $recordModel = new PatientRecordModel();
+        $latest = $recordModel
+            ->where('fk_patient_id', $post->patient_id)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        if (isset($latest)) {
+            date_default_timezone_set("Asia/Manila");
+            $latest = new DateTime($latest["created_at"]);
+            $interval = $latest->diff(new DateTime());
+            $total_minutes = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+
+            if ($total_minutes < 10) {
+                $remaining = 10 - $total_minutes;
+                return $this->response
+                    ->setContentType('application/json')
+                    ->setJSON(["timeout_duration_minutes" => "$remaining"])
+                    ->setStatusCode(200);
+            }
+        }
+
         $recordModel->insert([
             'blood_glucose_level' => $post->blood_glucose_level,
             'bmi_level' => $post->bmi_level,
