@@ -56,7 +56,7 @@ class PatientController extends BaseController
         }
 
         $patientModel->update($post->web_id, [
-            'name' => $post->first_name . (empty($post->middle_name) ? "" : " " . $post->middle_name)  . " " . $post->last_name,
+            'name' => $post->first_name . (empty($post->middle_name) ? "" : " " . $post->middle_name[0] . ".")  . " " . $post->last_name,
             'birthdate' => $post->birthdate,
             'province' => $post->province,
             'municipality' => $post->municipality,
