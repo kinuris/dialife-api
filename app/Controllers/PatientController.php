@@ -114,8 +114,11 @@ class PatientController extends BaseController
             ->orderBy('created_at', 'DESC')
             ->first();
 
-        if (isset($latest)) {
+        if (getenv("CI_ENVIRONMENT") === 'development') {
             date_default_timezone_set("Asia/Manila");
+        }
+        
+        if (isset($latest)) {
             $latest = new DateTime($latest["created_at"]);
             $interval = $latest->diff(new DateTime());
             $total_minutes = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
