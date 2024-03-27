@@ -297,13 +297,13 @@ class PatientController extends BaseController
         }
 
         $recordModel->insert([
-            'blood_glucose_level' => $post->blood_glucose_level,
+            'blood_glucose_level' => $post->glucose_level,
             'bmi_level' => $post->bmi_level,
             'activity_type' => $post->activity_type,
             'activity_duration' => $post->activity_duration,
             'activity_frequency' => $post->activity_frequency,
-            'nutrition_foods' => $post->nutrition_foods,
-            'nutrition_meal_time' => $post->nutrition_meal_time,
+            'nutrition_foods' => $post->foods,
+            'nutrition_meal_time' => $post->meal_time,
             'fk_patient_id' => $post->patient_id,
             'glucose_created_at' => $post->glucose_created_at,
             'bmi_created_at' => $post->bmi_created_at,
