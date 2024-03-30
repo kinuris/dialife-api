@@ -21,6 +21,7 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->post("/patient/assign", "PatientController::assign_doctor");
     $routes->post("/patient/sync", "PatientController::sync_patient_state");
     $routes->post("/patient/revoke", "PatientController::revoke_doctor");
+    $routes->post("/patient/record/syncall", "PatientController::sync_all_records");
     
     $routes->post("/doctor/checkauth", "DoctorController::check_auth");
     $routes->post("/doctor/contact/get", "DoctorController::get_numbers");

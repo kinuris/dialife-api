@@ -68,7 +68,6 @@ class DoctorController extends BaseController
 
     public function add_contact()
     {
-        // TODO: Add to routes
         $jwt = get_cookie("jwt");
 
         if (!isset($jwt) || $jwt === "deleted") {
@@ -112,7 +111,6 @@ class DoctorController extends BaseController
 
     public function delete_contact()
     {
-        // TODO: Add to routes
         $jwt = get_cookie("jwt");
 
         if (!isset($jwt) || $jwt === "deleted") {

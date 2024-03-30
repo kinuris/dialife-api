@@ -31,6 +31,33 @@ class PatientController extends BaseController
             ->setJSON($patientModel->findAll());
     }
 
+    public function sync_all_records()
+    {
+        $post = $this->request->getJSON();
+
+        if (
+            !isset($post->patient_id) ||
+            !isset($post->records)
+        ) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
+        }
+
+        $recordModel = new PatientRecordModel();
+        $recordModel->where("fk_patient_id", $post->patient_id)->delete(purge: true);
+
+
+        foreach ($post->records as $record) {
+            $recordModel->insert($record);
+        }
+
+        return $this->response
+            ->setContentType('application/json')
+            ->setJSON(['message' => 'Success'])
+            ->setStatusCode(200);
+    }
 
     public function sync_patient_state()
     {
