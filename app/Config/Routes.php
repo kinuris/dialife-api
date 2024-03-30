@@ -13,6 +13,7 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->get("/patient/record/(:num)/(:num)", "PatientController::get_recent_records/$1/$2");
     $routes->get("/doctor/get/(:num)", "DoctorController::index/$1");
     $routes->get("/doctor/of/(:num)", "DoctorController::get_connected_patients/$1");
+    $routes->get("/patient/doctors/get/(:num)", "PatientController::get_doctors/$1");
 
     $routes->post("/patient/record/latest", "PatientController::get_latest_record");
     $routes->post("/patient/record/consolidated", "PatientController::get_records");

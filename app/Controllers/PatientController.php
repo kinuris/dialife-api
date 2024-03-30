@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\ConnectionModel;
+use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\PatientRecordModel;
 use App\Utils\Utils;
@@ -128,6 +129,26 @@ class PatientController extends BaseController
         return $this->response
             ->setContentType('application/json')
             ->setJSON(['message' => 'Success'])
+            ->setStatusCode(200);
+    }
+
+    public function get_doctors($patientId)
+    {
+        $connectionModel = new ConnectionModel();
+        $connections = $connectionModel->where("fk_patient_id", $patientId)->find();
+
+        $doctors = array();
+        $doctorModel = new DoctorModel();
+
+        foreach ($connections as $connection) {
+            $doctor = $doctorModel->find($connection["fk_doctor_id"]);
+            unset($doctor["password"]);
+            array_push($doctors, $doctor);
+        }
+
+        return $this->response
+            ->setContentType('application/json')
+            ->setJSON($doctors)
             ->setStatusCode(200);
     }
 
