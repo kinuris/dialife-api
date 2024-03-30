@@ -45,11 +45,16 @@ class PatientController extends BaseController
                 ->setStatusCode(404);
         }
 
+        // TODO: Add Authentication
         $recordModel = new PatientRecordModel();
-        $recordModel->where("fk_patient_id", $post->patient_id)->delete(purge: true);
-
+        $recordModel->where("fk_patient_id", $post->patient_id)->delete();
 
         foreach ($post->records as $record) {
+            $record->blood_glucose_level = $record->glucose_level;
+            $record->fk_patient_id = $post->patient_id;
+            $record->nutrition_foods = $record->foods;
+            $record->nutrition_meal_time = $record->meal_time;
+
             $recordModel->insert($record);
         }
 
@@ -274,7 +279,7 @@ class PatientController extends BaseController
 
         if (
             // !isset($post->glucose_created_at) ||
-            // !isset($post->blood_glucose_level) ||
+            !isset($post->glucose_level) ||
             // !isset($post->bmi_created_at) ||
             // !isset($post->bmi_level) ||
             // !isset($post->activity_created_at) ||

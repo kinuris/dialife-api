@@ -31,7 +31,9 @@ class PatientRecordModel extends Model
         'medicine_dosage',
         'medicine_taken_at',
         'fk_patient_id',
-        'created_at'
+        'created_at',
+        'water_glasses',
+        'water_created_at'
     ];
 
 }
