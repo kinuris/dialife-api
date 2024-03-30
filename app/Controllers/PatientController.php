@@ -47,7 +47,7 @@ class PatientController extends BaseController
 
         // TODO: Add Authentication
         $recordModel = new PatientRecordModel();
-        $recordModel->where("fk_patient_id", $post->patient_id)->delete();
+        $recordModel->where("fk_patient_id", $post->patient_id)->delete(purge: true);
 
         foreach ($post->records as $record) {
             $recordModel->insert([
