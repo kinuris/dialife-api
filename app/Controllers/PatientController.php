@@ -50,12 +50,27 @@ class PatientController extends BaseController
         $recordModel->where("fk_patient_id", $post->patient_id)->delete();
 
         foreach ($post->records as $record) {
-            $record->blood_glucose_level = $record->glucose_level;
-            $record->fk_patient_id = $post->patient_id;
-            $record->nutrition_foods = $record->foods;
-            $record->nutrition_meal_time = $record->meal_time;
-
-            $recordModel->insert($record);
+            $recordModel->insert([
+                'blood_glucose_level' => $record->glucose_level,
+                'bmi_level' => $record->bmi_level,
+                'activity_type' => $record->activity_type,
+                'activity_duration' => $record->activity_duration,
+                'activity_frequency' => $record->activity_frequency,
+                'nutrition_foods' => $record->foods,
+                'nutrition_meal_time' => $record->meal_time,
+                'fk_patient_id' => $record->patient_id,
+                'glucose_created_at' => $record->glucose_created_at,
+                'bmi_created_at' => $record->bmi_created_at,
+                'nutrition_created_at' => $record->nutrition_created_at,
+                'activity_created_at' => $record->activity_created_at,
+                'medicine_name' => $record->medicine_name,
+                'medicine_route' => $record->medicine_route,
+                'medicine_form' => $record->medicine_form,
+                'medicine_dosage' => $record->medicine_dosage,
+                'medicine_taken_at' => $record->medicine_taken_at,
+                'water_glasses' => $record->water_glasses,
+                'water_created_at' => $record->water_created_at
+            ]);
         }
 
         return $this->response
