@@ -15,6 +15,8 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->get("/doctor/of/(:num)", "DoctorController::get_connected_patients/$1");
     $routes->get("/patient/doctors/get/(:num)", "PatientController::get_doctors/$1");
 
+    $routes->get("/doctor/profilepic/(:segment)", "DoctorController::get_profile_pic/$1");
+
     $routes->post("/patient/record/latest", "PatientController::get_latest_record");
     $routes->post("/patient/record/consolidated", "PatientController::get_records");
     $routes->post("/patient/create", "PatientController::create_patient");
@@ -31,5 +33,7 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->post("/doctor/login", "DoctorController::login");
     $routes->post("/doctor/contact/delete", "DoctorController::delete_contact");
     $routes->post("/doctor/contact/add", "DoctorController::add_contact");
+    $routes->post("/doctor/profilepic", "DoctorController::change_profile_pic");
+
     $routes->post("/generate/key/", "DoctorController::gen_registration_keys");
 });

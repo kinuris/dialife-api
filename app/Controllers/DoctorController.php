@@ -24,6 +24,61 @@ class DoctorController extends BaseController
             ->setJSON($doctor);
     }
 
+    public function get_profile_pic($filename)
+    {
+        $filepath = APPPATH . 'uploads/' . $filename;
+        if (file_exists($filepath)) {
+            return $this->response
+                ->setContentType(mime_content_type($filepath))
+                ->setHeader('Content-Length', filesize($filepath))
+                ->setBody(file_get_contents($filepath));
+        }
+
+        return $this->response
+            ->setStatusCode(404);
+    }
+
+    public function change_profile_pic()
+    {
+        $post = $this->request->getJSON();
+
+        if (
+            !isset($post->doctor_id) ||
+            !isset($post->pic)
+        ) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
+        }
+
+        $uid = substr(sha1($post->doctor_id), 0, 16);
+        $filepath = APPPATH . 'uploads/' . $uid;
+
+        if (str_contains($post->pic, 'data:image/jpeg;base64,')) {
+            $data = str_replace('data:image/jpeg;base64,', '', $post->pic);
+            $path = $filepath . '.jpg';
+            $link = $uid . '.jpg';
+        } else if (str_contains($post->pic, 'data:image/png;base64,')) {
+            $data = str_replace('data:image/png;base64,', '', $post->pic);
+            $path = $filepath . '.png';
+            $link = $uid . '.png';
+        } else {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid image'])
+                ->setStatusCode(404);
+        }
+
+        file_put_contents($path, base64_decode($data));
+        $doctorModel = new DoctorModel();
+        $doctorModel->update($post->doctor_id, ['profile_picture_link' => '/dialife-api/doctor/profilepic/' . $link]);
+
+        return $this->response
+            ->setContentType("application/json")
+            ->setJSON(['message' => 'Success', 'link' => '/dialife-api/doctor/profilepic/' . $link]);
+    }
+
     public function gen_registration_keys()
     {
         $post = $this->request->getJSON();
@@ -300,7 +355,7 @@ class DoctorController extends BaseController
                 ->setStatusCode(404);
         }
 
-        $key = $keyModel->where('key_string', $post->regkey)->find(); 
+        $key = $keyModel->where('key_string', $post->regkey)->find();
         $keyModel->update($key[0]['registration_key_id'], ['used' => true]);
 
         $doctorModel->insert([
