@@ -9,6 +9,7 @@ writable/debugbar/
 .DS_Store
 .AppleDouble
 .LSOverride
+app/uploads/*
 
 # OS X Thumbnails
 ._*
