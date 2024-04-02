@@ -437,14 +437,14 @@ class PatientController extends BaseController
     public function revoke_doctor()
     {
         // TODO: Both patients and doctors can do this
-        $jwt = get_cookie("jwt");
+        // $jwt = get_cookie("jwt");
 
-        if (!isset($jwt) || $jwt === "deleted") {
-            return $this->response
-                ->setContentType('application/json')
-                ->setJSON(['message' => 'Unauthorized'])
-                ->setStatusCode(403);
-        }
+        // if (!isset($jwt) || $jwt === "deleted") {
+        //     return $this->response
+        //         ->setContentType('application/json')
+        //         ->setJSON(['message' => 'Unauthorized'])
+        //         ->setStatusCode(403);
+        // }
 
         $post = $this->request->getJSON();
 
