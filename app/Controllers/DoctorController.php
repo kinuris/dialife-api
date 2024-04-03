@@ -355,6 +355,16 @@ class DoctorController extends BaseController
                 ->setStatusCode(404);
         }
 
+        $existingName = $doctorModel->where('name', $post->name)
+            ->find();
+
+        if (count($existingName) > 0) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'name already exists'])
+                ->setStatusCode(404);
+        }
+
         $key = $keyModel->where('key_string', $post->regkey)->find();
         $keyModel->update($key[0]['registration_key_id'], ['used' => true]);
 
