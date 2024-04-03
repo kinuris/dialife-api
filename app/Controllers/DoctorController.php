@@ -24,6 +24,51 @@ class DoctorController extends BaseController
             ->setJSON($doctor);
     }
 
+    public function update_profile()
+    {
+        $post = $this->request->getJSON();
+
+        if (
+            !isset($post->doctor_id) ||
+            !isset($post->name) ||
+            !isset($post->email)
+        ) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'invalid data shape'])
+                ->setStatusCode(404);
+        }
+
+        $doctorModel = new DoctorModel();
+        $existingEmail = $doctorModel->where('email', $post->email)
+            ->where('doctor_id != ' . $post->doctor_id)
+            ->find();
+
+        if (count($existingEmail) > 0) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'email already exists'])
+                ->setStatusCode(404);
+        }
+
+        $existingName = $doctorModel->where('name', $post->name)
+            ->where('doctor_id != ' . $post->doctor_id)
+            ->find();
+
+        if (count($existingName) > 0) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setJSON(['message' => 'name already exists'])
+                ->setStatusCode(404);
+        }
+
+        $doctorModel->update($post->doctor_id, ['name' => $post->name, 'email' => $post->email]);
+        return $this->response
+            ->setContentType('application/json')
+            ->setJSON(['message' => 'success'])
+            ->setStatusCode(200);
+    }
+
     public function get_profile_pic($filename)
     {
         $filepath = APPPATH . 'uploads/' . $filename;

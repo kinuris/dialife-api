@@ -34,6 +34,7 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->post("/doctor/contact/delete", "DoctorController::delete_contact");
     $routes->post("/doctor/contact/add", "DoctorController::add_contact");
     $routes->post("/doctor/profilepic", "DoctorController::change_profile_pic");
+    $routes->post("/doctor/profile", "DoctorController::update_profile");
 
     $routes->post("/generate/key/", "DoctorController::gen_registration_keys");
 });
