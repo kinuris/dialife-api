@@ -30,6 +30,7 @@ class PatientRecordModel extends Model
         'medicine_form',
         'medicine_dosage',
         'medicine_taken_at',
+        'medicine_taken_time',
         'fk_patient_id',
         'created_at',
         'water_glasses',

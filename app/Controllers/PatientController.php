@@ -69,6 +69,7 @@ class PatientController extends BaseController
                 'medicine_form' => $record->medicine_form,
                 'medicine_dosage' => $record->medicine_dosage,
                 'medicine_taken_at' => $record->medicine_taken_at,
+                'medicine_taken_time' => $record->medicine_taken_time,
                 'water_glasses' => $record->water_glasses,
                 'water_created_at' => $record->water_created_at
             ]);
@@ -254,7 +255,7 @@ class PatientController extends BaseController
                 break;
             case "medication":
                 $createdAtString = "medicine_taken_at";
-                $relevantProperties = ['medicine_name', 'medicine_route', 'medicine_form', 'medicine_dosage', 'medicine_taken_at'];
+                $relevantProperties = ['medicine_name', 'medicine_route', 'medicine_form', 'medicine_dosage', 'medicine_taken_time', 'medicine_taken_at'];
                 break;
             case "bmi":
                 $createdAtString = "bmi_created_at";
