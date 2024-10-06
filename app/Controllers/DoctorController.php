@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\ChatConnectionModel;
+use App\Models\ChatMessageModel;
 use App\Models\ConnectionModel;
 use App\Models\DoctorModel;
 use App\Models\DoctorNumberModel;
@@ -251,6 +253,7 @@ class DoctorController extends BaseController
       ->setStatusCode(200);
   }
 
+
   public function get_connected_patients($doctorId)
   {
     $jwt = get_cookie("jwt");
@@ -362,6 +365,32 @@ class DoctorController extends BaseController
       ->setStatusCode(200);
   }
 
+  public function connect_chat()
+  {
+    $jwt = get_cookie("jwt");
+
+    if (!isset($jwt) || $jwt === "deleted") {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $payload = Utils::parseJWT($jwt);
+    $post = $this->request->getJSON();
+
+    $chatConnectionModel = new ChatConnectionModel();
+    $chatConnectionModel->insert([
+      'fk_doctor_id' => $payload['id'],
+      'fk_patient_id' => $post->patient_id
+    ]);
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON(['message' => 'Success'])
+      ->setStatusCode(200);
+  }
+
   public function create_doctor()
   {
     $post = $this->request->getJSON();
@@ -423,5 +452,94 @@ class DoctorController extends BaseController
       ->setContentType('application/json')
       ->setJSON(['message' => 'Success'])
       ->setStatusCode(404);
+  }
+
+  public function get_connected_chats()
+  {
+    $jwt = get_cookie("jwt");
+
+    if (!isset($jwt) || $jwt === "deleted") {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $payload = Utils::parseJWT($jwt);
+
+    $chatConnectionModel = new ChatConnectionModel();
+    $connections = $chatConnectionModel->where('fk_doctor_id', $payload['id'])->findAll();
+
+    $patients = array();
+    foreach ($connections as $connection) {
+      $patientModel = new PatientModel();
+      $patient = $patientModel->find($connection['fk_patient_id']);
+      array_push($patients, $patient);
+    }
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON($patients)
+      ->setStatusCode(200);
+  }
+
+  public function get_chat_id($doctor_id, $patient_id)
+  {
+    // $jwt = get_cookie("jwt");
+
+    // if (!isset($jwt) || $jwt === "deleted") {
+    //   return $this->response
+    //     ->setContentType('application/json')
+    //     ->setJSON(['message' => 'Unauthorized'])
+    //     ->setStatusCode(403);
+    // }
+
+    // $payload = Utils::parseJWT($jwt);
+
+    $chatConnectionModel = new ChatConnectionModel();
+    $connection = $chatConnectionModel->where('fk_doctor_id', $doctor_id)
+      ->where('fk_patient_id', $patient_id)
+      ->find();
+
+    if (!isset($connection[0])) {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Connection Not Found'])
+        ->setStatusCode(404);
+    }
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON($connection[0])
+      ->setStatusCode(200);
+  }
+
+  public function send_message($chat_connection_id)
+  {
+    $post = $this->request->getJSON();
+
+    $chatMessageModel = new ChatMessageModel();
+    $chatMessageModel->insert([
+      'fk_chat_connection_id' => $chat_connection_id,
+      'sender_type' => $post->sender_type,
+      'sender_id' => $post->sender_id,
+      'content' => $post->content
+    ]);
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON(['message' => 'Success'])
+      ->setStatusCode(200);
+  }
+
+  public function get_messages($chat_connection_id)
+  {
+    $chatMessageModel = new ChatMessageModel();
+    $messages = $chatMessageModel->where('fk_chat_connection_id', $chat_connection_id)->findAll();
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON($messages)
+      ->setStatusCode(200);
   }
 }

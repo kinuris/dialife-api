@@ -16,6 +16,11 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     $routes->get("/patient/doctors/get/(:num)", "PatientController::get_doctors/$1");
 
     $routes->get("/doctor/profilepic/(:segment)", "DoctorController::get_profile_pic/$1");
+    $routes->get("/doctor/chat/connected", "DoctorController::get_connected_chats");
+    $routes->get("/doctor/chat/getid/(:num)/(:num)", "DoctorController::get_chat_id/$1/$2");
+
+    $routes->post("/message/send/(:num)", "DoctorController::send_message/$1");
+    $routes->get("/message/get/(:num)", "DoctorController::get_messages/$1");
 
     $routes->post("/patient/record/latest", "PatientController::get_latest_record");
     $routes->post("/patient/record/consolidated", "PatientController::get_records");
@@ -28,6 +33,7 @@ $routes->group("", ["filter" => "ValidateJWTFilter"], function ($routes) {
     
     $routes->post("/doctor/checkauth", "DoctorController::check_auth");
     $routes->post("/doctor/contact/get", "DoctorController::get_numbers");
+    $routes->post("/doctor/chat/initiate", "DoctorController::connect_chat");
 
     $routes->post("/doctor/create", "DoctorController::create_doctor");
     $routes->post("/doctor/login", "DoctorController::login");
