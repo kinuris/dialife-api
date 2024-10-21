@@ -485,17 +485,6 @@ class DoctorController extends BaseController
 
   public function get_chat_id($doctor_id, $patient_id)
   {
-    // $jwt = get_cookie("jwt");
-
-    // if (!isset($jwt) || $jwt === "deleted") {
-    //   return $this->response
-    //     ->setContentType('application/json')
-    //     ->setJSON(['message' => 'Unauthorized'])
-    //     ->setStatusCode(403);
-    // }
-
-    // $payload = Utils::parseJWT($jwt);
-
     $chatConnectionModel = new ChatConnectionModel();
     $connection = $chatConnectionModel->where('fk_doctor_id', $doctor_id)
       ->where('fk_patient_id', $patient_id)
