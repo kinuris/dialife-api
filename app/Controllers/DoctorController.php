@@ -3,11 +3,13 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\AdminModel;
 use App\Models\ChatConnectionModel;
 use App\Models\ChatMessageModel;
 use App\Models\ConnectionModel;
 use App\Models\DoctorModel;
 use App\Models\DoctorNumberModel;
+use App\Models\KeyUsageModel;
 use App\Models\PatientModel;
 use App\Models\RegistrationKeyModel;
 use App\Utils\Utils;
@@ -24,6 +26,17 @@ class DoctorController extends BaseController
     return $this->response
       ->setContentType("application/json")
       ->setJSON($doctor);
+  }
+
+  public function get_admin($id)
+  {
+    $adminModel = new AdminModel();
+    $admin = $adminModel->find($id);
+    unset($admin['password']);
+
+    return $this->response
+      ->setContentType("application/json")
+      ->setJSON($admin);
   }
 
   public function update_profile()
@@ -128,6 +141,23 @@ class DoctorController extends BaseController
 
   public function gen_registration_keys()
   {
+    $jwt = get_cookie("jwt");
+
+    if (!isset($jwt) || $jwt === "deleted") {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $payload = Utils::parseJWT($jwt);
+    if ($payload['role'] != 'admin') {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
     $post = $this->request->getJSON();
 
     if (
@@ -317,7 +347,6 @@ class DoctorController extends BaseController
 
   public function login()
   {
-    $doctorModel = new DoctorModel();
     $post = $this->request->getJSON();
 
     if (
@@ -330,25 +359,52 @@ class DoctorController extends BaseController
         ->setStatusCode(404);
     }
 
-    $doctors = $doctorModel->where("email", $post->email)->findAll();
-    if (empty($doctors)) {
+    $doctorModel = new DoctorModel();
+    $doctor = $doctorModel
+      ->where('email', $post->email)
+      ->first();
+
+    $adminModel = new AdminModel();
+    $admin = $adminModel
+      ->where('email', $post->email)
+      ->first();
+
+    if (is_null($doctor) && is_null($admin)) {
       return $this->response
         ->setContentType('application/json')
         ->setJSON(['message' => 'Wrong email or password'])
         ->setStatusCode(200);
     }
-    $doctor = $doctors[0];
 
-    if (!password_verify($post->password, $doctor["password"])) {
-      return $this->response
-        ->setContentType('application/json')
-        ->setJSON(['message' => 'Wrong email or password'])
-        ->setStatusCode(200);
+    // if (!password_verify($post->password, $doctor['password']) && !password_verify($post->password, $admin['password'])) {
+    //   return $this->response
+    //     ->setContentType('application/json')
+    //     ->setJSON(['message' => 'Wrong email or password'])
+    //     ->setStatusCode(200);
+    // }
+
+    if (!is_null($doctor)) {
+      if (!password_verify($post->password, $doctor['password'])) {
+        return $this->response
+          ->setContentType('application/json')
+          ->setJSON(['message' => 'Wrong email or password'])
+          ->setStatusCode(200);
+      }
+    }
+
+    if (!is_null($admin)) {
+      if (!password_verify($post->password, $admin['password'])) {
+        return $this->response
+          ->setContentType('application/json')
+          ->setJSON(['message' => 'Wrong email or password'])
+          ->setStatusCode(200);
+      }
     }
 
     $payload = [
-      'id' => $doctor['doctor_id'],
-      'iss' => 'https://dialife.io',
+      'id' => is_null($doctor) ? $admin['admin_id'] : $doctor['doctor_id'],
+      'role' => is_null($doctor) ? 'admin' : 'doctor',
+      'iss' => 'https://dialife.info',
       // NOTE: time() + x, where the JWT expires in 'x' seconds 
       'exp' => time() + 3600,
     ];
@@ -360,7 +416,8 @@ class DoctorController extends BaseController
       ->setContentType('application/json')
       ->setJSON([
         'message' => 'Success',
-        'id' => $doctor['doctor_id'],
+        'role' => is_null($doctor) ? 'admin' : 'doctor',
+        'id' => is_null($doctor) ? $admin['admin_id'] : $doctor['doctor_id'],
       ])
       ->setStatusCode(200);
   }
@@ -442,10 +499,16 @@ class DoctorController extends BaseController
     $key = $keyModel->where('key_string', $post->regkey)->find();
     $keyModel->update($key[0]['registration_key_id'], ['used' => true]);
 
-    $doctorModel->insert([
+    $id = $doctorModel->insert([
       'name' => $post->name,
       'email' => $post->email,
       'password' => password_hash($post->password, PASSWORD_ARGON2I),
+    ]);
+
+    $keyUsageModel = new KeyUsageModel();
+    $keyUsageModel->insert([
+      'fk_doctor_id' => $id,
+      'fk_registration_key_id' => $key[0]['registration_key_id']
     ]);
 
     return $this->response
@@ -531,4 +594,78 @@ class DoctorController extends BaseController
       ->setJSON($messages)
       ->setStatusCode(200);
   }
+
+  public function get_all_regkeys()
+  {
+    $jwt = get_cookie("jwt");
+
+    if (!isset($jwt) || $jwt === "deleted") {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $payload = Utils::parseJWT($jwt);
+    if ($payload['role'] != 'admin') {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $keyModel = new RegistrationKeyModel();
+    $keys = $keyModel->findAll();
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON($keys)
+      ->setStatusCode(200);
+  }
+
+  public function get_key_usages()
+  {
+    $jwt = get_cookie("jwt");
+
+    if (!isset($jwt) || $jwt === "deleted") {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $payload = Utils::parseJWT($jwt);
+    if ($payload['role'] != 'admin') {
+      return $this->response
+        ->setContentType('application/json')
+        ->setJSON(['message' => 'Unauthorized'])
+        ->setStatusCode(403);
+    }
+
+    $keyUsageModel = new KeyUsageModel();
+    $usages = $keyUsageModel->findAll();
+
+    $keyModel = new RegistrationKeyModel();
+    $doctorModel = new DoctorModel();
+
+    $results = array();
+    foreach ($usages as $usage) {
+      $key = $keyModel->find($usage['fk_registration_key_id']);
+      $doctor = $doctorModel->find($usage['fk_doctor_id']);
+
+      unset($doctor['password']);
+
+      $usage['key'] = $key;
+      $usage['doctor'] = $doctor;
+
+      array_push($results, $usage);
+    }
+
+    return $this->response
+      ->setContentType('application/json')
+      ->setJSON($results)
+      ->setStatusCode(200);
+  }
+
+  public function delete_key() {}
 }

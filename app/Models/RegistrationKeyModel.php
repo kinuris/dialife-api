@@ -14,6 +14,7 @@ class RegistrationKeyModel extends Model
     protected $allowedFields    = [
         'registration_key_id',
         'key_string',
-        'used'
+        'used',
+        'created_at'
     ];
 }

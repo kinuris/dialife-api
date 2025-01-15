@@ -13,6 +13,8 @@ class CreateRegistrationKey extends Migration
         $this->forge->addField('key_string VARCHAR(34) NOT NULL');
         $this->forge->addField('used BOOL NOT NULL DEFAULT FALSE');
 
+        $this->forge->addField('created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP');
+
         $this->forge->createTable('tbl_registration_key');
     }
 
